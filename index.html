@@ -1,15 +1,412 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workout App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forge Hypertrophy</title>
+
+<style>
+
+body{
+font-family:Arial,sans-serif;
+background:#111;
+color:#fff;
+padding:15px;
+margin:0;
+}
+
+h1{
+text-align:center;
+}
+
+.card{
+background:#222;
+padding:15px;
+border-radius:15px;
+margin-bottom:15px;
+}
+
+input,select{
+width:100%;
+padding:12px;
+margin:5px 0;
+border-radius:8px;
+border:0;
+font-size:16px;
+}
+
+button{
+width:100%;
+padding:15px;
+margin-top:8px;
+border-radius:10px;
+border:0;
+background:#28a745;
+color:white;
+font-size:16px;
+}
+
+button.red{
+background:#dc3545;
+}
+
+.exercise{
+background:#333;
+padding:10px;
+border-radius:10px;
+margin-top:10px;
+}
+
+.small{
+font-size:13px;
+color:#aaa;
+}
+
+</style>
 </head>
+
 
 <body>
 
-<h1>Workout App</h1>
 
-<p>Your hypertrophy tracker is starting here.</p>
+<h1>🔥 Forge</h1>
+
+<div class="card">
+
+<h2>Create Exercise</h2>
+
+<input id="name" placeholder="Exercise">
+
+<input id="weight" placeholder="Starting Weight">
+
+<input id="sets" placeholder="Sets">
+
+<input id="min" placeholder="Min Reps">
+
+<input id="max" placeholder="Max Reps">
+
+<input id="targetRIR" placeholder="Target RIR">
+
+
+<button onclick="addExercise()">
+Add Exercise
+</button>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>Today's Workout</h2>
+
+<div id="workout"></div>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>History</h2>
+
+<div id="history"></div>
+
+</div>
+
+
+
+<script>
+
+
+let exercises =
+JSON.parse(localStorage.getItem("exercises")) || [];
+
+let history =
+JSON.parse(localStorage.getItem("history")) || [];
+
+
+
+function save(){
+
+localStorage.setItem(
+"exercises",
+JSON.stringify(exercises)
+);
+
+localStorage.setItem(
+"history",
+JSON.stringify(history)
+);
+
+}
+
+
+
+function addExercise(){
+
+let e={
+
+name:
+name.value,
+
+weight:
+Number(weight.value),
+
+sets:
+Number(sets.value),
+
+min:
+Number(min.value),
+
+max:
+Number(max.value),
+
+rir:
+Number(targetRIR.value),
+
+logs:[]
+
+};
+
+
+exercises.push(e);
+
+save();
+
+render();
+
+}
+
+
+
+function logWorkout(index){
+
+
+let e=exercises[index];
+
+
+let results=[];
+
+
+for(let i=0;i<e.sets;i++){
+
+
+let reps=
+Number(prompt(
+`${e.name} Set ${i+1} reps`
+));
+
+
+let rir=
+Number(prompt(
+"RIR achieved"
+));
+
+
+results.push({
+
+reps,
+rir
+
+});
+
+
+}
+
+
+
+let successful=true;
+
+let failed=false;
+
+
+
+results.forEach(r=>{
+
+
+if(
+r.reps < e.max ||
+r.rir < e.rir
+){
+
+successful=false;
+
+}
+
+
+if(
+r.reps < e.min ||
+r.rir <=0
+){
+
+failed=true;
+
+}
+
+
+});
+
+
+
+
+if(successful){
+
+e.weight +=5;
+
+alert(
+"Great session! Next weight: "
++e.weight
+);
+
+}
+
+
+else if(failed){
+
+
+e.weight -=5;
+
+alert(
+"Too difficult. Reducing weight to "
++e.weight
+);
+
+
+}
+
+else{
+
+
+alert(
+"Maintain weight: "
++e.weight
+);
+
+
+}
+
+
+
+history.push({
+
+exercise:e.name,
+
+date:new Date().toLocaleDateString(),
+
+weight:e.weight,
+
+results
+
+});
+
+
+save();
+
+render();
+
+
+}
+
+
+
+
+function render(){
+
+
+let box=
+document.getElementById("workout");
+
+
+box.innerHTML="";
+
+
+exercises.forEach((e,i)=>{
+
+
+box.innerHTML+=`
+
+<div class="exercise">
+
+<b>${e.name}</b><br>
+
+Weight:
+${e.weight} lb
+
+<br>
+
+${e.sets} sets
+
+<br>
+
+${e.min}-${e.max} reps
+
+<br>
+
+Target RIR:
+${e.rir}
+
+
+<button onclick="logWorkout(${i})">
+
+Complete Workout
+
+</button>
+
+
+</div>
+
+
+`;
+
+
+});
+
+
+
+
+let h=
+document.getElementById("history");
+
+
+h.innerHTML="";
+
+
+history.slice().reverse()
+.forEach(x=>{
+
+
+h.innerHTML+=`
+
+<div class="exercise">
+
+${x.exercise}
+
+<br>
+
+${x.date}
+
+<br>
+
+Weight:
+${x.weight}
+
+</div>
+
+
+`;
+
+});
+
+
+}
+
+
+
+render();
+
+
+</script>
+
 
 </body>
 </html>
